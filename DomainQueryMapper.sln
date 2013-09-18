@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainQueryMapper", "DomainQueryMapper\DomainQueryMapper.csproj", "{3E003DF4-B4F4-4FE3-AD54-7DAB2068CB34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DomainQueryMapper.Tests", "DomainQueryMapper.Tests\DomainQueryMapper.Tests.csproj", "{E90ACC98-6A84-466C-9A15-340000D7B5DD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3E003DF4-B4F4-4FE3-AD54-7DAB2068CB34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E003DF4-B4F4-4FE3-AD54-7DAB2068CB34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E003DF4-B4F4-4FE3-AD54-7DAB2068CB34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E003DF4-B4F4-4FE3-AD54-7DAB2068CB34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E90ACC98-6A84-466C-9A15-340000D7B5DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E90ACC98-6A84-466C-9A15-340000D7B5DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E90ACC98-6A84-466C-9A15-340000D7B5DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E90ACC98-6A84-466C-9A15-340000D7B5DD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
