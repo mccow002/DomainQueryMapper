@@ -52,9 +52,14 @@
   <ItemGroup>
     <Compile Include="TestObjects\AppraiserDomainMap.cs" />
     <Compile Include="TestObjects\Data\AppraiserObj.cs" />
+    <Compile Include="TestObjects\Data\CountyObj.cs" />
+    <Compile Include="TestObjects\Data\StateObj.cs" />
     <Compile Include="TestObjects\Data\UserObj.cs" />
     <Compile Include="TestObjects\Domain\Appraiser.cs" />
+    <Compile Include="TestObjects\Domain\County.cs" />
+    <Compile Include="TestObjects\Domain\State.cs" />
     <Compile Include="TestObjects\Domain\User.cs" />
+    <Compile Include="TestObjects\StateDomainMap.cs" />
     <Compile Include="TestObjects\TestValueMethods.cs" />
     <Compile Include="Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

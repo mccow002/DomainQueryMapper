@@ -22,10 +22,10 @@ namespace DomainQueryMapper
 
         public static Expression<Func<TTo, bool>> MapQuery<TTo, TFrom>(Expression<Func<TFrom, bool>> query)
         {
-            var parts = GetMemberExpressions(query.Body);
+            var parts = GetMemberExpressions(query.Body).ToList();
 
             var mappedParts = new List<Expression>();
-            var arg = Expression.Parameter(typeof(TTo), "x");
+            var arg = Expression.Parameter(typeof(TTo));
             var fromName = typeof (TFrom).Name;
             foreach (var part in parts)
             {
@@ -70,73 +70,6 @@ namespace DomainQueryMapper
             return exp;
         }
 
-        private static Expression MapMethodCallExpression(MethodCallExpression methodCall, ParameterExpression pe, Type fromType)
-        {
-            var name = GetName(methodCall);
-
-            if (string.IsNullOrWhiteSpace(name))
-            {
-                var constant = Expression.Lambda(methodCall, null).Compile().DynamicInvoke();
-                return Expression.Constant(constant);
-            }
-
-            var map = DomainQueryMapper.Maps.FirstOrDefault(x => x.Key == fromType.Name);
-            if (map != null)
-            {
-                var dataProperty = map.Maps.FirstOrDefault(x => x.Key == name);
-                if (dataProperty != null)
-                {
-                    var body = dataProperty.DataProperty;
-                    if (body is UnaryExpression)
-                        body = ((UnaryExpression)body).Operand;
-                    name = ((MemberExpression)body).Member.Name;
-                }
-            }
-
-            Expression propertyEx = Expression.Property(pe, name);
-            return Expression.Call(propertyEx, methodCall.Method, methodCall.Arguments);
-        }
-
-        private static string GetName(Expression property)
-        {
-            var body = property;
-            if (body is UnaryExpression)
-                body = ((UnaryExpression)body).Operand;
-
-            return (body is MemberExpression) ? ((MemberExpression)body).Member.Name : string.Empty;
-        }
-
-        private static Expression GetPropertyExpression(Expression ex, ParameterExpression pe)
-        {
-            var propEx = (MemberExpression)ex;
-
-            var exps = new Queue<Expression>();
-            while (propEx != null)
-            {
-                exps.Enqueue(propEx);
-                if (propEx.Expression is MemberExpression)
-                    propEx = (MemberExpression)propEx.Expression;
-                else
-                    propEx = null;
-            }
-
-            Expression finalExp = null;
-            foreach (var exp in exps.Reverse())
-            {
-                var memberExp = (MemberExpression)exp;
-                if (finalExp == null)
-                {
-                    finalExp = Expression.Property(pe, memberExp.Member.Name);
-                    continue;
-                }
-
-                finalExp = Expression.Property(finalExp, memberExp.Member.Name);
-            }
-
-            return finalExp;
-        }
-
-
         private static IEnumerable<Expression> GetMemberExpressions(Expression body)
         {
             // A Queue preserves left to right reading order of expressions in the tree
@@ -167,6 +100,9 @@ namespace DomainQueryMapper
                 }
                 else if (expr is MethodCallExpression)
                 {
+                    if (expr.NodeType == ExpressionType.Call)
+                        yield return expr;
+
                     var method = expr as MethodCallExpression;
                     foreach (var argument in method.Arguments)
                     {

@@ -10,6 +10,9 @@ namespace DomainQueryMapper.Tests.TestObjects
              MapProperty(x => x.Id)
                  .To(x => x.AppraiserId);
 
+             MapProperty(x => x.Company)
+                 .To(x => x.AppraiserCompany);
+
              MapProperty(x => x.User.Id)
                  .To(x => x.User.UserId);
 

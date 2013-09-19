@@ -14,7 +14,7 @@ namespace DomainQueryMapper.Helpers
              return (MemberExpression) ex;
          }
 
-         public static Expression GetPropertyExpression(Expression ex, ParameterExpression pe)
+         public static Expression BuildPropertyExpression(Expression ex, ParameterExpression pe)
          {
              var propEx = (MemberExpression)ex;
 
@@ -42,6 +42,58 @@ namespace DomainQueryMapper.Helpers
              }
 
              return finalExp;
+         }
+
+         public static bool IsParameterExpression(Expression ex)
+         {
+             var innerEx = ex;
+             while (innerEx != null)
+             {
+                 if (innerEx is ParameterExpression)
+                     break;
+
+                 innerEx = GetExpression(innerEx);
+             }
+
+             return innerEx is ParameterExpression;
+         }
+
+         public static Expression GetExpression(Expression ex)
+         {
+             if (ex is ParameterExpression)
+                 return null;
+             if (ex is MemberExpression)
+                 return ((MemberExpression)ex).Expression;
+             if (ex is MethodCallExpression)
+                 return ((MethodCallExpression)ex).Object;
+             if (ex is UnaryExpression)
+                 return ((UnaryExpression)ex).Operand;
+
+             return null;
+         }
+
+         public static string GetName(Expression property)
+         {
+             var propEx = property;
+             Expression memberEx = null;
+             while (propEx != null)
+             {
+                 propEx = GetExpression(propEx);
+                 if (propEx != null && !(propEx is ParameterExpression))
+                     memberEx = propEx;
+             }
+
+             var body = memberEx;
+             if (body is UnaryExpression)
+                 body = ((UnaryExpression)body).Operand;
+
+             if (body is MethodCallExpression)
+             {
+                 var methodCall = (MethodCallExpression) body;
+                 body = methodCall.Object ?? methodCall.Arguments[0];
+             }
+
+             return (body is MemberExpression) ? ((MemberExpression)body).Member.Name : string.Empty;
          }
     }
 }

@@ -18,5 +18,9 @@ namespace DomainQueryMapper
         public List<IPropertyMap> Maps { get { return _propertyMaps; } }
 
         public string Key { get { return typeof(TFrom).Name; } }
+
+        public Type FromType { get { return typeof (TFrom); } }
+
+        public Type ToType { get { return typeof (TTo); } }
     }
 }

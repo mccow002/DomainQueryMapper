@@ -12,6 +12,9 @@ namespace DomainQueryMapper.MappingStrategies
              if(ex is MemberExpression)
                  return new MemberExpressionMapper();
 
+             if(ex is MethodCallExpression)
+                 return new MethodCallMapper();
+
              return null;
          }
     }

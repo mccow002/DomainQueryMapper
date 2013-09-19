@@ -12,7 +12,7 @@ namespace DomainQueryMapper.MappingStrategies
             var map = DomainMapperHelpers.GetMap(fromName, name);
 
             return map != null ? 
-                ExpressionHelpers.GetPropertyExpression(ExpressionHelpers.GetMemberExpression(map.DataProperty), pe) : 
+                ExpressionHelpers.BuildPropertyExpression(ExpressionHelpers.GetMemberExpression(map.DataProperty), pe) : 
                 Expression.Property(pe, name);
         }
     }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace DomainQueryMapper
 {
@@ -6,5 +7,7 @@ namespace DomainQueryMapper
     {
         string Key { get; }
         List<IPropertyMap> Maps { get; }
+        Type FromType { get; }
+        Type ToType { get; }
     }
 }
