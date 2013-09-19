@@ -19,6 +19,7 @@ namespace DomainQueryMapper.Tests
         {
             DomainQueryMapper.AddMap(new AppraiserDomainMap());
             DomainQueryMapper.AddMap(new StateDomainMap());
+            DomainQueryMapper.AddMap(new UserDomainMap());
 
             BuildMockDataSource();
         }
@@ -84,6 +85,7 @@ namespace DomainQueryMapper.Tests
         }
 
         [TestMethod]
+        [Description("x => x.IsActive")]
         public void SubPropertyToProperty_Member_True()
         {
             var results = Query<Appraiser>(x => x.IsActive).ToList();

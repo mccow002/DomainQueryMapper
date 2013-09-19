@@ -61,6 +61,7 @@
     <Compile Include="TestObjects\Domain\User.cs" />
     <Compile Include="TestObjects\StateDomainMap.cs" />
     <Compile Include="TestObjects\TestValueMethods.cs" />
+    <Compile Include="TestObjects\UserDomainMap.cs" />
     <Compile Include="Tests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

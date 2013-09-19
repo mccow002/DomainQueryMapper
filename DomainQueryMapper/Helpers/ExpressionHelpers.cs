@@ -65,35 +65,59 @@ namespace DomainQueryMapper.Helpers
              if (ex is MemberExpression)
                  return ((MemberExpression)ex).Expression;
              if (ex is MethodCallExpression)
-                 return ((MethodCallExpression)ex).Object;
+             {
+                 var methodCall = (MethodCallExpression) ex;
+                 return methodCall.Object == null && methodCall.Arguments.Any()
+                            ? methodCall.Arguments[0]
+                            : methodCall.Object;
+             }
              if (ex is UnaryExpression)
                  return ((UnaryExpression)ex).Operand;
 
              return null;
          }
 
-         public static string GetName(Expression property)
+         public static string GetLowestLevelPropertyName(Expression property)
          {
-             var propEx = property;
-             Expression memberEx = null;
-             while (propEx != null)
-             {
-                 if (!(propEx is ParameterExpression))
-                     memberEx = propEx;
-                 propEx = GetExpression(propEx);
-             }
-
-             var body = memberEx;
-             if (body is UnaryExpression)
-                 body = ((UnaryExpression)body).Operand;
-
-             if (body is MethodCallExpression)
-             {
-                 var methodCall = (MethodCallExpression) body;
-                 body = methodCall.Object ?? methodCall.Arguments[0];
-             }
-
-             return (body is MemberExpression) ? ((MemberExpression)body).Member.Name : string.Empty;
+             var prop = GetLowestLevelProperty(property);
+             return (prop is MemberExpression) ? ((MemberExpression)prop).Member.Name : string.Empty;
          }
+
+        public static Expression GetLowestLevelProperty(Expression ex)
+        {
+            var propEx = ex;
+            Expression memberEx = null;
+            while (propEx != null)
+            {
+                if (!(propEx is ParameterExpression))
+                    memberEx = propEx;
+                propEx = GetExpression(propEx);
+            }
+
+            var body = memberEx;
+            if (body is UnaryExpression)
+                body = ((UnaryExpression)body).Operand;
+
+            if (body is MethodCallExpression)
+            {
+                var methodCall = (MethodCallExpression)body;
+                body = methodCall.Object ?? methodCall.Arguments[0];
+            }
+
+            return body;
+        }
+
+        public static string GetHighestLevelPropertyName(Expression ex)
+        {
+            var propEx = ex;
+            Expression memberEx = propEx;
+            while (!(propEx is MemberExpression))
+            {
+                propEx = GetExpression(propEx);
+                memberEx = propEx;
+            }
+
+            return (memberEx is MemberExpression) ? ((MemberExpression)memberEx).Member.Name : string.Empty;
+        }
     }
 }

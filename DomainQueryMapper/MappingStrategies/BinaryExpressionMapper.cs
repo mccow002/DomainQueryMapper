@@ -11,12 +11,29 @@ namespace DomainQueryMapper.MappingStrategies
         public Expression Map(Expression ex, ParameterExpression pe, string fromName)
         {
             var binary = (BinaryExpression)ex;
-            var name = ExpressionHelpers.GetName(binary.Left);
-            var map = DomainMapperHelpers.GetMap(fromName, name);
+            var propName = ExpressionHelpers.GetLowestLevelPropertyName(binary.Left);
+            var map = DomainMapperHelpers.GetMap(fromName, propName);
+
+            //This need to be modified to be more recursive. Current only support one-level sub properties
+            if (map == null)
+            {
+                var highestPropName = ExpressionHelpers.GetHighestLevelPropertyName(binary.Left);
+                map = DomainMapperHelpers.GetMap(fromName, highestPropName);
+
+                if (map == null)
+                {
+                    var lowestLevelProp = ExpressionHelpers.GetLowestLevelProperty(binary.Left);
+                    var typeMap = DomainMapperHelpers.GetMapFromType(lowestLevelProp.Type);
+                    if (typeMap != null)
+                    {
+                        map = typeMap.Maps.FirstOrDefault(x => x.Key == highestPropName);
+                    }
+                }
+            }
 
             var leftEx = map == null ? binary.Left : ExpressionHelpers.GetExpression(map.DataProperty);
 
-            var left = DetermineLeftMapper(leftEx)(leftEx, pe, name);
+            var left = DetermineLeftMapper(leftEx)(leftEx, pe, propName);
             
             var right = binary.Right;
             if (!ExpressionHelpers.IsParameterExpression(right))

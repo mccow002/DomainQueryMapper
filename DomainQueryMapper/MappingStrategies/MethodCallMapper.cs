@@ -21,7 +21,7 @@ namespace DomainQueryMapper.MappingStrategies
                     parts.Enqueue(propEx);
             }
 
-            var name = ExpressionHelpers.GetName(methodCall);
+            var name = ExpressionHelpers.GetLowestLevelPropertyName(methodCall);
             var map = DomainMapperHelpers.GetMap(fromName, name);
 
             Expression finalExp = null;
