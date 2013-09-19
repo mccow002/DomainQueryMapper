@@ -24,12 +24,20 @@ namespace DomainQueryMapper.MappingStrategies
             var name = ExpressionHelpers.GetName(methodCall);
             var map = DomainMapperHelpers.GetMap(fromName, name);
 
+            Expression finalExp = null;
             foreach (var part in parts.Reverse())
             {
-                
+                if (part is MemberExpression)
+                    finalExp = Expression.Property(finalExp ?? pe, ((MemberExpression) part).Member.Name);
+
+                if (part is MethodCallExpression)
+                {
+                    var mc = (MethodCallExpression) part;
+                    finalExp = Expression.Call(finalExp ?? pe, mc.Method, mc.Arguments);
+                }
             }
 
-
+            return finalExp;
 
             //    var methodCall = (MethodCallExpression) ex;
             //    var name = ExpressionHelpers.GetName(methodCall);

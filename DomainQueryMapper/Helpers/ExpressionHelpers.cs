@@ -78,9 +78,9 @@ namespace DomainQueryMapper.Helpers
              Expression memberEx = null;
              while (propEx != null)
              {
-                 propEx = GetExpression(propEx);
-                 if (propEx != null && !(propEx is ParameterExpression))
+                 if (!(propEx is ParameterExpression))
                      memberEx = propEx;
+                 propEx = GetExpression(propEx);
              }
 
              var body = memberEx;
