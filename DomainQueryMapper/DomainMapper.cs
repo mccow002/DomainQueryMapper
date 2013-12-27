@@ -13,11 +13,10 @@ namespace DomainQueryMapper
             if (!(property.Body is MemberExpression))
                 throw new ArgumentException("The func must be a member expression", "property");
 
-            //var param = Expression.Parameter(typeof(TTo), "x");
-            //var exp = MapMemberExpression((MemberExpression)property.Body, param, typeof(TFrom));
-            //return Expression.Lambda<Func<TTo, object>>(exp, param);
-
-            return null;
+            var param = Expression.Parameter(typeof(TTo), "x");
+            var mapper = new MemberExpressionMapper();
+            var exp = mapper.Map(property.Body, param, typeof(TFrom).Name, typeof(object));
+            return Expression.Lambda<Func<TTo, object>>(exp, param);
         }
 
         public static Expression<Func<TTo, T>> MapQuery<TTo, TFrom, T>(Expression<Func<TFrom, T>> query)
@@ -26,14 +25,14 @@ namespace DomainQueryMapper
 
             var mappedParts = new List<Expression>();
             var arg = Expression.Parameter(typeof(TTo));
-            var fromName = typeof (TFrom).Name;
+            var fromName = typeof(TFrom).Name;
             foreach (var part in parts)
             {
                 var strategy = MappingFactory.GetStrategy(part);
 
-                if(strategy != null)
+                if (strategy != null)
                     mappedParts.Add(strategy.Map(part, arg, fromName, typeof(T)));
-                
+
                 //if (part is MethodCallExpression)
                 //    mappedParts.Add(MapMethodCallExpression((MethodCallExpression)part, arg, typeof(TFrom)));
 
@@ -77,21 +76,16 @@ namespace DomainQueryMapper
             while (candidates.Count > 0)
             {
                 var expr = candidates.Dequeue();
-                if (expr is MemberExpression)
-                {
+                if (expr is MemberExpression) 
                     yield return expr;
-                }
-                else if (expr is UnaryExpression)
-                {
+                else if (expr is UnaryExpression) 
                     candidates.Enqueue(((UnaryExpression)expr).Operand);
-                }
                 else if (expr is BinaryExpression)
                 {
                     var binary = expr as BinaryExpression;
 
                     if (!(binary.Left is BinaryExpression) && !(binary.Right is BinaryExpression))
-                        if (IsValidType(binary.NodeType))
-                            yield return binary;
+                        if (IsValidType(binary.NodeType)) yield return binary;
                         else
                         {
                             candidates.Enqueue(binary.Left);
@@ -100,8 +94,7 @@ namespace DomainQueryMapper
                 }
                 else if (expr is MethodCallExpression)
                 {
-                    if (expr.NodeType == ExpressionType.Call)
-                        yield return expr;
+                    if (expr.NodeType == ExpressionType.Call) yield return expr;
 
                     var method = expr as MethodCallExpression;
                     foreach (var argument in method.Arguments)
