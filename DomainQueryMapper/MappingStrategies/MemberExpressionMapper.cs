@@ -1,11 +1,13 @@
-﻿using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 using DomainQueryMapper.Helpers;
 
 namespace DomainQueryMapper.MappingStrategies
 {
     public class MemberExpressionMapper : IMappingStrategy
     {
-        public Expression Map(Expression ex, ParameterExpression pe, string fromName)
+        public Expression Map(Expression ex, ParameterExpression pe, string fromName, Type propType
+            )
         {
             var member = (MemberExpression)ex;
             var name = member.Member.Name;

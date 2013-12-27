@@ -17,9 +17,9 @@ namespace DomainQueryMapper.Tests
         [TestInitialize]
         public void Setup()
         {
-            DomainQueryMapper.AddMap(new AppraiserDomainMap());
-            DomainQueryMapper.AddMap(new StateDomainMap());
-            DomainQueryMapper.AddMap(new UserDomainMap());
+            DomainQueryAtlas.AddMap(new AppraiserDomainMap());
+            DomainQueryAtlas.AddMap(new StateDomainMap());
+            DomainQueryAtlas.AddMap(new UserDomainMap());
 
             BuildMockDataSource();
         }

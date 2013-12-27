@@ -1,14 +1,14 @@
-﻿using System;
+﻿using DomainQueryMapper.Helpers;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
-using DomainQueryMapper.Helpers;
 
 namespace DomainQueryMapper.MappingStrategies
 {
     public class BinaryExpressionMapper : IMappingStrategy
     {
-        public Expression Map(Expression ex, ParameterExpression pe, string fromName)
+        public Expression Map(Expression ex, ParameterExpression pe, string fromName, Type propType)
         {
             var binary = (BinaryExpression)ex;
             var propName = ExpressionHelpers.GetLowestLevelPropertyName(binary.Left);
@@ -33,8 +33,8 @@ namespace DomainQueryMapper.MappingStrategies
 
             var leftEx = map == null ? binary.Left : ExpressionHelpers.GetExpression(map.DataProperty);
 
-            var left = DetermineLeftMapper(leftEx)(leftEx, pe, propName);
-            
+            var left = DetermineLeftMapper(leftEx)(leftEx, pe, propName, propType);
+
             var right = binary.Right;
             if (!ExpressionHelpers.IsParameterExpression(right))
                 right = Expression.Constant(Expression.Lambda(right, null).Compile().DynamicInvoke());
@@ -42,62 +42,61 @@ namespace DomainQueryMapper.MappingStrategies
             return Expression.MakeBinary(binary.NodeType, left, right);
         }
 
-        private Func<Expression, ParameterExpression, string, Expression> DetermineLeftMapper(Expression left)
+        private Func<Expression, ParameterExpression, string, Type, Expression> DetermineLeftMapper(Expression left)
         {
             if (left is MemberExpression)
                 return MemberMapper;
 
             if (left is MethodCallExpression)
             {
-                var methodEx = (MethodCallExpression) left;
+                var methodEx = (MethodCallExpression)left;
                 var declaringType = methodEx.Method.DeclaringType;
 
-                return declaringType == typeof (Enumerable)
-                           ? (Func<Expression, ParameterExpression, string, Expression>) LinqMethodMapper
+                return declaringType == typeof(Enumerable)
+                           ? (Func<Expression, ParameterExpression, string, Type, Expression>)LinqMethodMapper
                            : SimpleMethodMapper;
             }
             return null;
         }
 
-        private Expression MemberMapper(Expression memberEx, ParameterExpression pe, string name)
+        private Expression MemberMapper(Expression memberEx, ParameterExpression pe, string name, Type propType)
         {
             return ExpressionHelpers.BuildPropertyExpression(memberEx, pe);
         }
 
-        private Expression SimpleMethodMapper(Expression methodEx, ParameterExpression pe, string name)
+        private Expression SimpleMethodMapper(Expression methodEx, ParameterExpression pe, string name, Type propType)
         {
             var methodCall = (MethodCallExpression)methodEx;
             var propertyEx = Expression.Property(pe, name);
             return Expression.Call(propertyEx, methodCall.Method, methodCall.Arguments);
         }
 
-        private Expression LinqMethodMapper(Expression methodEx, ParameterExpression pe, string name)
+        private Expression LinqMethodMapper(Expression methodEx, ParameterExpression pe, string name, Type propType)
         {
-            var methodCall = (MethodCallExpression) methodEx;
+            var methodCall = (MethodCallExpression)methodEx;
             var newArgs = new List<Expression>();
 
             Type toType = null;
             foreach (var argument in methodCall.Arguments)
             {
-                if(argument.NodeType == ExpressionType.MemberAccess)
-                    newArgs.Add(new MemberExpressionMapper().Map(argument, pe, name));
+                if (argument.NodeType == ExpressionType.MemberAccess)
+                    newArgs.Add(new MemberExpressionMapper().Map(argument, pe, name, propType));
 
                 if (argument.NodeType == ExpressionType.Lambda)
                 {
-                    var lambdaEx = (LambdaExpression) argument;
+                    var lambdaEx = (LambdaExpression)argument;
                     var fromType = lambdaEx.Parameters.First().Type;
                     var map = DomainMapperHelpers.GetMapFromType(fromType);
 
-                    if(map == null)
+                    if (map == null)
                         throw new Exception(string.Format("You must define a map for type {0}", fromType.Name));
 
                     toType = map.ToType;
-                    var mi = typeof (DomainMapper).GetMethod("MapQuery");
-                    mi = mi.MakeGenericMethod(new[] {toType, fromType});
-                    var mappedQuery = mi.Invoke(null, new[] {lambdaEx});
+                    var mi = typeof(DomainMapper).GetMethod("MapQuery");
+                    mi = mi.MakeGenericMethod(new[] { toType, fromType, propType });
+                    var mappedQuery = mi.Invoke(null, new[] { lambdaEx });
 
-                    newArgs.Add((Expression) mappedQuery);
-
+                    newArgs.Add((Expression)mappedQuery);
                 }
             }
 

@@ -13,14 +13,14 @@ namespace DomainQueryMapper
             if (!(property.Body is MemberExpression))
                 throw new ArgumentException("The func must be a member expression", "property");
 
-            var param = Expression.Parameter(typeof(TTo), "x");
+            //var param = Expression.Parameter(typeof(TTo), "x");
             //var exp = MapMemberExpression((MemberExpression)property.Body, param, typeof(TFrom));
             //return Expression.Lambda<Func<TTo, object>>(exp, param);
 
             return null;
         }
 
-        public static Expression<Func<TTo, bool>> MapQuery<TTo, TFrom>(Expression<Func<TFrom, bool>> query)
+        public static Expression<Func<TTo, T>> MapQuery<TTo, TFrom, T>(Expression<Func<TFrom, T>> query)
         {
             var parts = GetMemberExpressions(query.Body).ToList();
 
@@ -32,7 +32,7 @@ namespace DomainQueryMapper
                 var strategy = MappingFactory.GetStrategy(part);
 
                 if(strategy != null)
-                    mappedParts.Add(strategy.Map(part, arg, fromName));
+                    mappedParts.Add(strategy.Map(part, arg, fromName, typeof(T)));
                 
                 //if (part is MethodCallExpression)
                 //    mappedParts.Add(MapMethodCallExpression((MethodCallExpression)part, arg, typeof(TFrom)));
@@ -42,10 +42,10 @@ namespace DomainQueryMapper
             }
 
             var exp = MapNodes(query, mappedParts);
-            return Expression.Lambda<Func<TTo, bool>>(exp, arg);
+            return Expression.Lambda<Func<TTo, T>>(exp, arg);
         }
 
-        private static Expression MapNodes<TEntity>(Expression<Func<TEntity, bool>> query, List<Expression> mappedParts)
+        private static Expression MapNodes<TEntity, T>(Expression<Func<TEntity, T>> query, List<Expression> mappedParts)
         {
             Expression exp = mappedParts[0];
             var node = query.Body;

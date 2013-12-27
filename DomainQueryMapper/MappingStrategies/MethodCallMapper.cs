@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using DomainQueryMapper.Helpers;
@@ -7,7 +8,7 @@ namespace DomainQueryMapper.MappingStrategies
 {
     public class MethodCallMapper : IMappingStrategy
     {
-        public Expression Map(Expression ex, ParameterExpression pe, string fromName)
+        public Expression Map(Expression ex, ParameterExpression pe, string fromName, Type propType)
         {
             var methodCall = (MethodCallExpression) ex;
 

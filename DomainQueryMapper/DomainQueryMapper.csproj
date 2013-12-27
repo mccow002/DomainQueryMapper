@@ -42,7 +42,7 @@
     <Compile Include="DomainMapper.cs" />
     <Compile Include="DomainQueryMap.cs" />
     <Compile Include="DomainQueryMapExtensions.cs" />
-    <Compile Include="DomainQueryMapper.cs" />
+    <Compile Include="DomainQueryAtlas.cs" />
     <Compile Include="Helpers\DomainMapperHelpers.cs" />
     <Compile Include="Helpers\ExpressionHelpers.cs" />
     <Compile Include="IDomainQueryMap.cs" />

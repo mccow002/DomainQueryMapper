@@ -2,9 +2,9 @@
 
 namespace DomainQueryMapper
 {
-    public static class DomainQueryMapper
+    public static class DomainQueryAtlas
     {
-        static DomainQueryMapper()
+        static DomainQueryAtlas()
         {
             Maps = new List<IDomainQueryMap>();
         }
