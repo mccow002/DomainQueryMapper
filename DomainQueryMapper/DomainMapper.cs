@@ -22,6 +22,7 @@ namespace DomainQueryMapper
         public static Expression<Func<TTo, T>> MapQuery<TTo, TFrom, T>(Expression<Func<TFrom, T>> query)
         {
             var parts = GetMemberExpressions(query.Body).ToList();
+            parts.Reverse();
 
             var mappedParts = new List<Expression>();
             var arg = Expression.Parameter(typeof(TTo));
@@ -46,27 +47,40 @@ namespace DomainQueryMapper
 
         private static Expression MapNodes<TEntity, T>(Expression<Func<TEntity, T>> query, List<Expression> mappedParts)
         {
-            Expression exp = mappedParts[0];
             var node = query.Body;
-            var index = 0;
-            while (index < mappedParts.Count())
+
+            var index = mappedParts.Count() - 1;
+            var exp = mappedParts[index];
+            index = index - 1;
+
+            while (index >= 0)
             {
-                if (node.NodeType == ExpressionType.AndAlso)
-                    exp = Expression.AndAlso(exp, mappedParts[index]);
+                var part = mappedParts[index];
+                var unary = DetermineUnaryType(node, exp, part);
+                if (unary != null) 
+                    exp = unary;
 
-                if (node.NodeType == ExpressionType.OrElse)
-                    exp = Expression.OrElse(exp, mappedParts[index]);
-
-                if (node.NodeType == ExpressionType.Not)
-                    exp = Expression.Not(mappedParts[index]);
-
-                index = index + 1;
+                index = index - 1;
 
                 if (node is BinaryExpression)
-                    node = ((BinaryExpression)node).Right;
+                    node = ((BinaryExpression)node).Left;
             }
 
             return exp;
+        }
+
+        private static Expression DetermineUnaryType(Expression node, Expression exp, Expression part)
+        {
+            if (node.NodeType == ExpressionType.AndAlso)
+                return Expression.AndAlso(exp, part);
+
+            if (node.NodeType == ExpressionType.OrElse)
+                return Expression.OrElse(exp, part);
+
+            if (node.NodeType == ExpressionType.Not)
+                return Expression.Not(part);
+
+            return null;
         }
 
         private static IEnumerable<Expression> GetMemberExpressions(Expression body)
@@ -79,17 +93,25 @@ namespace DomainQueryMapper
                 if (expr is MemberExpression) 
                     yield return expr;
                 else if (expr is UnaryExpression) 
-                    candidates.Enqueue(((UnaryExpression)expr).Operand);
+                    yield return expr;
+                    //candidates.Enqueue(((UnaryExpression)expr).Operand);
                 else if (expr is BinaryExpression)
                 {
                     var binary = expr as BinaryExpression;
 
+                    if (binary.NodeType == ExpressionType.AndAlso || binary.NodeType == ExpressionType.OrElse)
+                    {
+                        candidates.Enqueue(binary.Right);
+                        candidates.Enqueue(binary.Left);
+                    }
+
                     if (!(binary.Left is BinaryExpression) && !(binary.Right is BinaryExpression))
-                        if (IsValidType(binary.NodeType)) yield return binary;
+                        if (IsValidType(binary.NodeType)) 
+                            yield return binary;
                         else
                         {
-                            candidates.Enqueue(binary.Left);
                             candidates.Enqueue(binary.Right);
+                            candidates.Enqueue(binary.Left);
                         }
                 }
                 else if (expr is MethodCallExpression)

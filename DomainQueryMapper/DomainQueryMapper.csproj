@@ -52,6 +52,7 @@
     <Compile Include="MappingStrategies\MappingFactory.cs" />
     <Compile Include="MappingStrategies\MemberExpressionMapper.cs" />
     <Compile Include="MappingStrategies\MethodCallMapper.cs" />
+    <Compile Include="MappingStrategies\UnaryExpressionMapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="PropertyMap.cs" />
   </ItemGroup>

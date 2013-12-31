@@ -116,6 +116,40 @@ namespace DomainQueryMapper.Tests
         }
 
         [TestMethod]
+        public void PropertyGreaterThanCheckAndToLocalVariable_NotMappedProperty()
+        {
+            var appraiserId = TestValueMethods.AppraiserId();
+            var results = this.Query<Appraiser>(x => x.AppraiserId > 0 && x.AppraiserId == appraiserId).ToList();
+
+            Assert.AreEqual(results.Count(), 1);
+            Assert.AreEqual(results.First().Id, 1);
+            Assert.AreEqual(results.First().Name, "Chris");
+        }
+
+        [TestMethod]
+        public void PropertyGreaterThanCheckOrToLocalVariable_NotMappedProperty()
+        {
+            var appraiserId = TestValueMethods.AppraiserId();
+            var results = this.Query<Appraiser>(x => x.AppraiserId > 2 || x.AppraiserId == appraiserId).ToList();
+
+            Assert.AreEqual(results.Count(), 2);
+            Assert.AreEqual(results[0].Id, 1);
+            Assert.AreEqual(results[0].Name, "Chris");
+            Assert.AreEqual(results[1].Id, 3);
+            Assert.AreEqual(results[1].Name, "Stu");
+        }
+
+        [TestMethod]
+        public void PropertyFalseAndPropertyEquals_MappedProperty()
+        {
+            var results = this.Query<Appraiser>(x => !x.IsActive && x.AppraiserId == 2).ToList();
+
+            Assert.AreEqual(results.Count(), 1);
+            Assert.AreEqual(results.First().Id, 2);
+            Assert.AreEqual(results.First().Name, "Gill");
+        }
+
+        [TestMethod]
         public void PropertyMethodCall_NoMappedProperty()
         {
             var results = Query<Appraiser>(x => x.Name.Contains("Ch")).ToList();
@@ -165,6 +199,32 @@ namespace DomainQueryMapper.Tests
             Assert.AreEqual(results.First().Name, "Chris");
         }
 
+        [TestMethod]
+        public void PropertyEqualThreeParts_ReturnsOne()
+        {
+            var results = this.Query<Appraiser>(x => x.IsActive && x.Title == "Developer" && x.Age == 28).ToList();
+
+            Assert.AreEqual(results.Count(), 1);
+            Assert.AreEqual(results.First().Id, 3);
+            Assert.AreEqual(results.First().Name, "Stu");
+        }
+
+        [TestMethod]
+        public void PropertyEqualThreeParts_ReturnsNone()
+        {
+            var results = this.Query<Appraiser>(x => x.Title == "Developer" && !x.IsActive && x.Age == 28).ToList();
+
+            Assert.AreEqual(results.Count(), 0);
+        }
+
+        [TestMethod]
+        public void PropertyTrueAndPropertyEqualsOrPropertyEquals_ReturnsTwo()
+        {
+            var results = this.Query<Appraiser>(x => !x.IsActive && (x.Title == "Developer" || x.Age == 28)).ToList();
+
+            Assert.AreEqual(1, results.Count());
+        }
+
         private IEnumerable<AppraiserObj> Query<TTo>(Expression<Func<TTo, bool>> query)
         {
             return _dataSource.AsQueryable().MappedWhere(query).ToList();
@@ -182,6 +242,8 @@ namespace DomainQueryMapper.Tests
                         {
                             Id = 1,
                             Name = "Chris",
+                            Age = 27,
+                            Title = "Developer",
                             User = new UserObj
                                 {
                                     Id = 1,
@@ -198,6 +260,8 @@ namespace DomainQueryMapper.Tests
                         {
                             Id = 2,
                             Name = "Gill",
+                            Age = 28,
+                            Title = "Boss",
                             User = new UserObj
                                 {
                                     Id = 2,
@@ -216,6 +280,8 @@ namespace DomainQueryMapper.Tests
                         {
                             Id = 3,
                             Name = "Stu",
+                            Age = 28,
+                            Title = "Developer",
                             User = new UserObj
                                 {
                                     Id = 3,
